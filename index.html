@@ -8,68 +8,66 @@
     :root { --primary-color: #007aff; --bg-color: #f5f5f7; --card-bg: #ffffff; }
     body { font-family: -apple-system, sans-serif; background-color: var(--bg-color); padding: 15px; margin: 0; }
     .container { max-width: 500px; margin: 0 auto; }
-    .form-group { margin-bottom: 10px; }
-    input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+    .view { display: none; }
+    .active { display: block; }
+    
+    input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; margin-bottom: 10px; }
     .btn { width: 100%; padding: 12px; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 5px; }
+    
     .record-card { background: var(--card-bg); padding: 15px; margin-top: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     .preview-img { max-width: 100%; margin-top: 10px; border-radius: 8px; display: none; }
-    .map-box { width: 100%; height: 200px; margin-bottom: 20px; border-radius: 12px; overflow: hidden; background: #eee; }
+    .nav-bar { display: flex; justify-content: space-between; margin-bottom: 20px; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>고속도로 맛집 기록</h1>
-
-  <div class="map-box">
-    <iframe width="100%" height="100%" frameborder="0" src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d100000!2d127.0!3d37.5!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sko!2skr!4v1600000000000" allowfullscreen></iframe>
+  <div id="mainView" class="view active">
+    <h1>고속도로 맛집 리스트</h1>
+    <input type="text" id="searchInput" placeholder="🔍 휴게소명 또는 메뉴 검색" oninput="renderList()">
+    
+    <div style="display:flex; gap:5px;">
+      <button class="btn" onclick="showView('formView')">+ 새 기록</button>
+      <button class="btn" style="background:#666" onclick="renderList('desc')">별점순↑</button>
+      <button class="btn" style="background:#666" onclick="renderList('asc')">별점순↓</button>
+    </div>
+    <div id="listContainer"></div>
   </div>
 
-  <input type="text" id="searchInput" placeholder="🔍 휴게소명 또는 메뉴 검색" oninput="renderList()">
-  
-  <div style="margin: 15px 0; display:flex; gap:5px;">
-    <input type="text" id="newHighway" placeholder="새 고속도로명">
-    <button style="width:auto; padding:0 15px;" onclick="addHighway()">+</button>
+  <div id="formView" class="view">
+    <h2 id="formTitle">맛집 기록하기</h2>
+    <form id="recordForm">
+      <input type="hidden" id="editIndex" value="-1">
+      <input type="text" id="highway" placeholder="고속도로명 (예: 동해선(상행))" required>
+      <input type="text" id="restArea" placeholder="휴게소명" required>
+      <input type="date" id="visitDate" required>
+      <input type="text" id="menu" placeholder="메뉴명" required>
+      <select id="rating">
+        <option value="5">★★★★★ (5점)</option><option value="4">★★★★☆ (4점)</option>
+        <option value="3">★★★☆☆ (3점)</option><option value="2">★★☆☆☆ (2점)</option>
+        <option value="1">★☆☆☆☆ (1점)</option>
+      </select>
+      <textarea id="comment" placeholder="평가 (맛, 서비스, 분위기)" rows="3"></textarea>
+      <input type="file" id="imageInput" accept="image/*" onchange="processImage(this)">
+      <img id="preview" class="preview-img">
+      <button type="submit" class="btn">저장</button>
+      <button type="button" class="btn" style="background:#ccc" onclick="showView('mainView')">취소</button>
+    </form>
   </div>
-
-  <form id="recordForm">
-    <input type="hidden" id="editIndex" value="-1">
-    <select id="highwaySelect" required></select>
-    <div class="form-group"><input type="text" id="restArea" placeholder="휴게소명" required></div>
-    <div class="form-group"><input type="date" id="visitDate" required></div>
-    <div class="form-group"><input type="text" id="menu" placeholder="메뉴명" required></div>
-    <select id="rating">
-      <option value="5">★★★★★ (5점)</option><option value="4">★★★★☆ (4점)</option>
-      <option value="3">★★★☆☆ (3점)</option><option value="2">★★☆☆☆ (2점)</option>
-      <option value="1">★☆☆☆☆ (1점)</option>
-    </select>
-    <textarea id="comment" placeholder="평가 (맛, 서비스, 분위기)"></textarea>
-    <input type="file" id="imageInput" accept="image/*" onchange="processImage(this)">
-    <img id="preview" class="preview-img">
-    <button type="submit" class="btn">기록 저장</button>
-  </form>
-
-  <div style="display:flex; gap:5px; margin-top:20px;">
-    <button class="btn" style="background:#666" onclick="renderList('desc')">별점 높은순</button>
-    <button class="btn" style="background:#666" onclick="renderList('asc')">별점 낮은순</button>
-  </div>
-
-  <div id="listContainer"></div>
 </div>
 
 <script>
   let records = JSON.parse(localStorage.getItem('myHighwayRecords')) || [];
-  let highways = JSON.parse(localStorage.getItem('myHighways')) || ["경부선(상행)", "경부선(하행)", "서해안선(상행)", "서해안선(하행)"];
   let currentImage = "";
 
-  function updateHighwaySelect() {
-    const sel = document.getElementById('highwaySelect');
-    sel.innerHTML = highways.map(h => `<option value="${h}">${h}</option>`).join('');
-  }
-
-  function addHighway() {
-    const val = document.getElementById('newHighway').value;
-    if(val) { highways.push(val); localStorage.setItem('myHighways', JSON.stringify(highways)); updateHighwaySelect(); document.getElementById('newHighway').value = ''; }
+  function showView(viewId) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(viewId).classList.add('active');
+    if(viewId === 'mainView') {
+      document.getElementById('recordForm').reset();
+      document.getElementById('editIndex').value = "-1";
+      document.getElementById('preview').style.display = 'none';
+    }
   }
 
   function processImage(input) {
@@ -80,7 +78,7 @@
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 400; 
+        const MAX_WIDTH = 400;
         canvas.width = MAX_WIDTH;
         canvas.height = (img.height * MAX_WIDTH) / img.width;
         canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -97,8 +95,8 @@
     e.preventDefault();
     const idx = document.getElementById('editIndex').value;
     const data = {
+      highway: document.getElementById('highway').value,
       restArea: document.getElementById('restArea').value,
-      highway: document.getElementById('highwaySelect').value,
       date: document.getElementById('visitDate').value,
       menu: document.getElementById('menu').value,
       rating: parseInt(document.getElementById('rating').value),
@@ -107,7 +105,8 @@
     };
     if (idx == "-1") records.push(data); else records[idx] = data;
     localStorage.setItem('myHighwayRecords', JSON.stringify(records));
-    this.reset(); currentImage = ''; document.getElementById('preview').style.display = 'none'; renderList();
+    showView('mainView');
+    renderList();
   };
 
   function renderList(order = 'desc') {
@@ -120,12 +119,14 @@
           .forEach((item, index) => {
       list.innerHTML += `
         <div class="record-card">
-          <h3>${item.restArea} (${item.highway})</h3>
+          <h3>${item.restArea} <small style="font-weight:normal; font-size:14px; color:#666;">(${item.highway})</small></h3>
           <p>메뉴: ${item.menu} | 별점: ${'★'.repeat(item.rating)}</p>
           ${item.image ? `<img src="${item.image}" style="width:100%; border-radius:8px;">` : ''}
-          <p style="font-size:12px">${item.date} | ${item.comment}</p>
-          <button onclick="editItem(${index})">수정</button>
-          <button onclick="deleteItem(${index})">삭제</button>
+          <p style="font-size:13px; color:#333;">${item.comment}</p>
+          <div style="text-align:right;">
+            <button onclick="editItem(${index})">수정</button>
+            <button onclick="deleteItem(${index})">삭제</button>
+          </div>
         </div>
       `;
     });
@@ -134,18 +135,21 @@
   function editItem(index) {
     const item = records[index];
     document.getElementById('editIndex').value = index;
+    document.getElementById('highway').value = item.highway;
     document.getElementById('restArea').value = item.restArea;
-    document.getElementById('highwaySelect').value = item.highway;
+    document.getElementById('visitDate').value = item.date;
     document.getElementById('menu').value = item.menu;
+    document.getElementById('rating').value = item.rating;
+    document.getElementById('comment').value = item.comment;
     if(item.image) { document.getElementById('preview').src = item.image; document.getElementById('preview').style.display = 'block'; currentImage = item.image; }
-    window.scrollTo(0,0);
+    showView('formView');
   }
 
   function deleteItem(index) {
     if(confirm('정말 삭제하시겠습니까?')) { records.splice(index, 1); localStorage.setItem('myHighwayRecords', JSON.stringify(records)); renderList(); }
   }
 
-  window.onload = () => { updateHighwaySelect(); renderList(); document.getElementById('visitDate').valueAsDate = new Date(); };
+  window.onload = () => { renderList(); document.getElementById('visitDate').valueAsDate = new Date(); };
 </script>
 </body>
 </html>
