@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>고속도로 맛집 기록</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        .input-group { margin-bottom: 10px; }
+        input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
+        button { padding: 10px; background: #007bff; color: white; border: none; width: 100%; margin-top: 10px; }
+        .review-card { border: 1px solid #ccc; padding: 10px; margin-top: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <h2>고속도로 맛집 기록</h2>
+    <div class="input-group">
+        <input type="text" id="restArea" placeholder="휴게소명 (예: 괴산휴게소)">
+        <select id="highway">
+            <option>경부</option><option>서해안</option><option>논산천안</option>
+            <option>중부</option><option>제2중부</option><option>중부내륙</option>
+        </select>
+        <select id="direction"><option>상행</option><option>하행</option></select>
+        <input type="text" id="food" placeholder="음식명 (예: 국밥)">
+        <input type="number" id="rating" placeholder="별점 (1-5)" min="1" max="5">
+        <textarea id="memo" placeholder="메모"></textarea>
+        <button onclick="saveReview()">기록 저장</button>
+    </div>
+
+    <hr>
+    <div>
+        <button onclick="displayReviews('high')">별점 높은 순</button>
+        <button onclick="displayReviews('low')">별점 낮은 순</button>
+    </div>
+    <div id="reviewList"></div>
+
+    <script>
+        function saveReview() {
+            const review = {
+                restArea: document.getElementById('restArea').value,
+                highway: document.getElementById('highway').value,
+                direction: document.getElementById('direction').value,
+                food: document.getElementById('food').value,
+                rating: parseInt(document.getElementById('rating').value),
+                memo: document.getElementById('memo').value,
+                date: new Date().toLocaleDateString()
+            };
+            let reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+            reviews.push(review);
+            localStorage.setItem('reviews', JSON.stringify(reviews));
+            alert('저장되었습니다!');
+            displayReviews();
+        }
+
+        function displayReviews(sortType) {
+            let reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+            if (sortType === 'high') reviews.sort((a, b) => b.rating - a.rating);
+            if (sortType === 'low') reviews.sort((a, b) => a.rating - b.rating);
+            
+            const list = document.getElementById('reviewList');
+            list.innerHTML = reviews.map(r => `
+                <div class="review-card">
+                    <strong>${r.restArea}</strong> (${r.highway}/${r.direction})<br>
+                    메뉴: ${r.food} | 별점: ${r.rating}점<br>
+                    <small>${r.date} | ${r.memo}</small>
+                </div>
+            `).join('');
+        }
+        displayReviews();
+    </script>
+</body>
+</html>
