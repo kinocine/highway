@@ -5,197 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>고속도로 맛집 기록</title>
   <style>
-    :root {
-      --primary-color: #007aff;
-      --bg-color: #f5f5f7;
-      --card-bg: #ffffff;
-      --text-color: #333333;
-      --star-color: #ffcc00;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .container {
-      max-width: 500px;
-      width: 100%;
-    }
-
-    h1 {
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      text-align: left;
-    }
-
-    /* 폼 공통 스타일 */
-    .form-group {
-      margin-bottom: 12px;
-    }
-
-    input[type="text"], input[type="date"], select, textarea {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      box-sizing: border-box;
-      font-size: 16px;
-    }
-
-    textarea {
-      height: 80px;
-      resize: none;
-    }
-
-    /* 파일 업로드 스타일 */
-    .file-input-wrapper {
-      background: var(--card-bg);
-      border: 1px dashed #ccc;
-      border-radius: 8px;
-      padding: 12px;
-      text-align: center;
-      position: relative;
-      cursor: pointer;
-    }
-    .file-input-wrapper input[type="file"] {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      opacity: 0;
-      cursor: pointer;
-    }
-    .preview-img {
-      max-width: 100%;
-      max-height: 150px;
-      margin-top: 10px;
-      border-radius: 6px;
-      display: none;
-    }
-
-    /* 별점 스타일 */
-    .rating-container {
-      display: flex;
-      align-items: center;
-      background: var(--card-bg);
-      padding: 10px 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      box-sizing: border-box;
-    }
-    .rating-container label.title {
-      font-size: 16px;
-      color: #666;
-      margin-right: 15px;
-    }
-    .star-rating {
-      display: flex;
-      flex-direction: row-reverse;
-      justify-content: flex-end;
-    }
-    .star-rating input { display: none; }
-    .star-rating label.star {
-      font-size: 24px;
-      color: #eee;
-      cursor: pointer;
-      padding: 0 2px;
-      transition: color 0.2s;
-    }
-    .star-rating input:checked ~ label.star,
-    .star-rating label.star:hover,
-    .star-rating label.star:hover ~ label.star {
-      color: var(--star-color);
-    }
-
-    /* 버튼 스타일 */
-    .btn {
-      width: 100%;
-      padding: 14px;
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-bottom: 10px;
-    }
-    .btn-secondary {
-      background-color: #e5e5ea;
-      color: #333;
-    }
-    .btn-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-    }
-
-    /* 고속도로 지도 UI */
-    .map-box {
-      width: 100%;
-      height: 200px;
-      background: #eef5ff;
-      border: 1px solid #d0e2ff;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
-    }
-    .map-title {
-      position: absolute;
-      top: 10px; left: 12px;
-      font-size: 12px; font-weight: bold; color: #004085;
-      background: rgba(255,255,255,0.8);
-      padding: 2px 6px; border-radius: 4px; z-index: 2;
-    }
-    .highway-line { position: absolute; background-color: #7daeff; }
-    .line-gyeongbu { width: 4px; height: 180px; left: 40%; top: 10px; transform: rotate(15deg); }
-    .line-seohaean { width: 4px; height: 160px; left: 20%; top: 30px; transform: rotate(5deg); }
-    .line-jungbunaeryuk { width: 4px; height: 170px; left: 65%; top: 15px; transform: rotate(20deg); }
-
-    /* 점멸 마커 */
-    .map-marker {
-      position: absolute; width: 14px; height: 14px;
-      background-color: #ff3b30; border-radius: 50%;
-      transform: translate(-50%, -50%); display: none; z-index: 10;
-    }
-    .map-marker::after {
-      content: ''; position: absolute; width: 100%; height: 100%; top: 0; left: 0;
-      background-color: #ff3b30; border-radius: 50%;
-      animation: pulse 1.5s infinite ease-in-out;
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      100% { transform: scale(3); opacity: 0; }
-    }
-
-    /* 맛집 리스트 카드 스타일 */
-    .record-card {
-      background: var(--card-bg);
-      border: 1px solid #e5e5ea;
-      border-radius: 12px;
-      padding: 16px;
-      margin-top: 12px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-    }
-    .record-header { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
-    .record-meta { font-size: 14px; color: #666; margin-bottom: 6px; }
-    .record-comment {
-      font-size: 14px; color: #333;
-      border-top: 1px dashed #eee; padding-top: 6px; margin-top: 6px;
-    }
-    .stars-display { color: var(--star-color); font-weight: bold; }
-    .list-img {
-      max-width: 100%; height: auto; max-height: 200px;
-      border-radius: 8px; margin-top: 8px; object-fit: cover;
-    }
+    :root { --primary-color: #007aff; --bg-color: #f5f5f7; --card-bg: #ffffff; --star-color: #ffcc00; }
+    body { font-family: -apple-system, sans-serif; background-color: var(--bg-color); padding: 20px; display: flex; flex-direction: column; align-items: center; }
+    .container { max-width: 500px; width: 100%; }
+    .form-group { margin-bottom: 12px; }
+    input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+    .btn { width: 100%; padding: 14px; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-bottom: 5px; }
+    .record-card { background: var(--card-bg); padding: 16px; margin-top: 12px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .rating-star { color: var(--star-color); font-size: 20px; }
+    .map-box { width: 100%; height: 200px; margin-bottom: 20px; border-radius: 12px; overflow: hidden; border: 1px solid #ddd; }
+    .preview-img { max-width: 100%; margin-top: 10px; border-radius: 8px; display: none; }
   </style>
 </head>
 <body>
@@ -203,224 +22,122 @@
 <div class="container">
   <h1>고속도로 맛집 기록</h1>
 
-  <!-- 1. 고속도로 간략 지도 영역 -->
   <div class="map-box">
-    <div class="map-title">📍 실시간 기록 노선 지도</div>
-    <div class="highway-line line-seohaean" title="서해안선"></div>
-    <div class="highway-line line-gyeongbu" title="경부선"></div>
-    <div class="highway-line line-jungbunaeryuk" title="중부내륙선"></div>
-
-    <div class="map-marker" id="marker-경부" style="left: 42%; top: 50%;"></div>
-    <div class="map-marker" id="marker-서해안" style="left: 21%; top: 60%;"></div>
-    <div class="map-marker" id="marker-중부내륙" style="left: 67%; top: 40%;"></div>
-    <div class="map-marker" id="marker-논산천안" style="left: 33%; top: 75%;"></div>
-    <div class="map-marker" id="marker-중부" style="left: 50%; top: 30%;"></div>
-    <div class="map-marker" id="marker-제2중부" style="left: 53%; top: 25%;"></div>
+    <iframe id="googleMap" width="100%" height="100%" frameborder="0" src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d100000!2d127.0!3d37.5!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sko!2skr!4v1!5m2!1sko!2skr" allowfullscreen></iframe>
   </div>
 
-  <!-- 2. 입력 폼 컴포넌트 -->
-  <form id="recipeForm" onsubmit="saveRecord(event)">
+  <form id="recordForm">
+    <input type="hidden" id="editIndex" value="-1">
+    <div class="form-group"><input type="text" id="restArea" placeholder="휴게소명" required></div>
+    <div class="form-group"><select id="highway"><option>경부선(상행)</option><option>경부선(하행)</option><option>서해안선(상행)</option><option>서해안선(하행)</option></select></div>
+    <div class="form-group"><input type="date" id="visitDate" required></div>
+    <div class="form-group"><input type="text" id="menu" placeholder="메뉴명" required></div>
     <div class="form-group">
-      <input type="text" id="restArea" placeholder="휴게소명 입력 (예: 괴산휴게소)" required oninput="updateMapMarker()">
+      <select id="rating"><option value="5">★★★★★</option><option value="4">★★★★☆</option><option value="3">★★★☆☆</option><option value="2">★★☆☆☆</option><option value="1">★☆☆☆☆</option></select>
     </div>
-
+    <div class="form-group"><textarea id="comment" placeholder="평가 (맛, 서비스, 분위기 등)"></textarea></div>
     <div class="form-group">
-      <select id="highway" required onchange="updateMapMarker()">
-        <option value="경부">경부</option>
-        <option value="서해안">서해안</option>
-        <option value="논산천안">논산천안</option>
-        <option value="중부">중부</option>
-        <option value="제2중부">제2중부</option>
-        <option value="중부내륙">중부내륙</option>
-      </select>
+      <input type="file" id="imageInput" accept="image/*" onchange="previewFile()">
+      <img id="preview" class="preview-img">
     </div>
-
-    <div class="form-group">
-      <select id="direction" required>
-        <option value="상행">상행</option>
-        <option value="하행">하행</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <input type="text" id="menu" placeholder="메뉴명 입력 (예: 국밥)" required>
-    </div>
-
-    <!-- 방문 날짜 입력창 (JS에서 오늘 날짜 기본 지정) -->
-    <div class="form-group">
-      <input type="date" id="visitDate" required>
-    </div>
-
-    <!-- 이미지 파일 업로드 영역 -->
-    <div class="form-group">
-      <div class="file-input-wrapper">
-        <span id="uploadText">📸 음식/휴게소 이미지 선택 (선택 사항)</span>
-        <input type="file" id="imageInput" accept="image/*" onchange="previewImage(this)">
-        <img id="imagePreview" class="preview-img" alt="미리보기">
-      </div>
-    </div>
-
-    <!-- 별점 아이콘 입력기 -->
-    <div class="form-group rating-container">
-      <label class="title">만족도</label>
-      <div class="star-rating">
-        <input type="radio" id="5-stars" name="rating" value="5" required /><label for="5-stars" class="star">&#9733;</label>
-        <input type="radio" id="4-stars" name="rating" value="4" /><label for="4-stars" class="star">&#9733;</label>
-        <input type="radio" id="3-stars" name="rating" value="3" /><label for="3-stars" class="star">&#9733;</label>
-        <input type="radio" id="2-stars" name="rating" value="2" /><label for="2-stars" class="star">&#9733;</label>
-        <input type="radio" id="1-star" name="rating" value="1" /><label for="1-star" class="star">&#9733;</label>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <textarea id="comment" placeholder="한줄평 및 메모를 남겨주세요 (불친절, 맛 등)"></textarea>
-    </div>
-
     <button type="submit" class="btn">기록 저장</button>
   </form>
 
-  <!-- 3. 정렬 버튼 목록 -->
-  <div class="btn-group">
-    <button class="btn btn-secondary" onclick="renderList('desc')">별점 높은 순</button>
-    <button class="btn btn-secondary" onclick="renderList('asc')">별점 낮은 순</button>
+  <div style="display:flex; gap:10px; margin-top:20px;">
+    <button class="btn" style="background:#666" onclick="renderList('desc')">별점 높은 순</button>
+    <button class="btn" style="background:#666" onclick="renderList('asc')">별점 낮은 순</button>
   </div>
 
-  <!-- 4. 데이터 리스트 표시창 -->
   <div id="listContainer"></div>
 </div>
 
 <script>
-  let records = JSON.parse(localStorage.getItem('highwayRecords')) || [
-    {
-      restArea: "괴산휴게소",
-      highway: "중부내륙",
-      direction: "상행",
-      menu: "국밥",
-      rating: 3,
-      comment: "불친절. 맛없음",
-      date: "2026-06-08",
-      image: ""
-    }
-  ];
+  let records = JSON.parse(localStorage.getItem('myHighwayRecords')) || [];
+  let currentImage = "";
 
-  // 이미지 파일 미리보기 처리
-  let currentImageData = "";
-  function previewImage(input) {
-    const preview = document.getElementById('imagePreview');
-    const uploadText = document.getElementById('uploadText');
-    
-    if (input.files && input.files[0]) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        currentImageData = e.target.result; // Base64 스트링 저장
-        preview.src = currentImageData;
-        preview.style.display = 'block';
-        uploadText.style.display = 'none';
-      }
-      reader.readAsDataURL(input.files[0]);
-    } else {
-      currentImageData = "";
-      preview.style.display = 'none';
-      uploadText.style.display = 'inline';
-    }
+  function previewFile() {
+    const file = document.getElementById('imageInput').files[0];
+    const reader = new FileReader();
+    reader.onload = e => {
+      currentImage = e.target.result;
+      document.getElementById('preview').src = currentImage;
+      document.getElementById('preview').style.display = 'block';
+    };
+    if (file) reader.readAsDataURL(file);
   }
 
-  // 지도 실시간 선택 노선 마커 점멸
-  function updateMapMarker() {
-    document.querySelectorAll('.map-marker').forEach(marker => marker.style.display = 'none');
-    const currentHighway = document.getElementById('highway').value;
-    const activeMarker = document.getElementById(`marker-${currentHighway}`);
-    if (activeMarker) {
-      activeMarker.style.display = 'block';
-    }
-  }
-
-  // 데이터 저장 처리
-  function saveRecord(e) {
+  document.getElementById('recordForm').onsubmit = function(e) {
     e.preventDefault();
-    
-    const restArea = document.getElementById('restArea').value;
-    const highway = document.getElementById('highway').value;
-    const direction = document.getElementById('direction').value;
-    const menu = document.getElementById('menu').value;
-    const visitDate = document.getElementById('visitDate').value; // 입력된 날짜 가져오기
-    
-    const ratingActive = document.querySelector('input[name="rating"]:checked');
-    const rating = ratingActive ? parseInt(ratingActive.value) : 5;
-    const comment = document.getElementById('comment').value;
-
-    const newRecord = { 
-      restArea, highway, direction, menu, rating, comment, 
-      date: visitDate, image: currentImageData 
+    const idx = document.getElementById('editIndex').value;
+    const data = {
+      restArea: document.getElementById('restArea').value,
+      highway: document.getElementById('highway').value,
+      date: document.getElementById('visitDate').value,
+      menu: document.getElementById('menu').value,
+      rating: parseInt(document.getElementById('rating').value),
+      comment: document.getElementById('comment').value,
+      image: currentImage
     };
 
-    records.push(newRecord);
-    try {
-      localStorage.setItem('highwayRecords', JSON.stringify(records));
-    } catch(error) {
-      alert("이미지 용량이 너무 커서 브라우저 저장소 용량을 초과했습니다. 조금 더 작은 이미지를 사용해주세요!");
-    }
+    if (idx === "-1") records.push(data);
+    else records[idx] = data;
+
+    localStorage.setItem('myHighwayRecords', JSON.stringify(records));
+    this.reset();
+    document.getElementById('preview').style.display = 'none';
+    document.getElementById('editIndex').value = "-1";
+    currentImage = "";
+    renderList();
+  };
+
+  function renderList(order = 'desc') {
+    const list = document.getElementById('listContainer');
+    list.innerHTML = '';
+    const sorted = [...records].sort((a,b) => order === 'desc' ? b.rating - a.rating : a.rating - b.rating);
     
-    // 폼 초기화 및 오늘 날짜 재세팅
-    document.getElementById('recipeForm').reset();
-    currentImageData = "";
-    document.getElementById('imagePreview').style.display = 'none';
-    document.getElementById('uploadText').style.display = 'inline';
-    setTodayDate();
-    updateMapMarker();
-    renderList('desc');
-  }
-
-  function getStarString(rating) {
-    return '★'.repeat(rating) + '☆'.repeat(5 - rating);
-  }
-
-  // UI 목록 출력
-  function renderList(sortOrder = 'desc') {
-    const listContainer = document.getElementById('listContainer');
-    listContainer.innerHTML = '';
-
-    const sortedData = [...records].sort((a, b) => {
-      return sortOrder === 'desc' ? b.rating - a.rating : a.rating - b.rating;
-    });
-
-    sortedData.forEach(item => {
-      const card = document.createElement('div');
-      card.className = 'record-card';
-      
-      // 날짜 포맷팅 점검 (화면 출력용)
-      let displayDate = item.date;
-      if(displayDate && displayDate.includes('-')) {
-        const parts = displayDate.split('-');
-        displayDate = `${parts[0]}. ${parseInt(parts[1])}. ${parseInt(parts[2])}.`;
-      }
-
-      card.innerHTML = `
-        <div class="record-header">${item.restArea} <span style="font-weight:normal; font-size:14px; color:#666;">(${item.highway}/${item.direction})</span></div>
-        <div class="record-meta">메뉴: <b>${item.menu}</b> | <span class="stars-display">${getStarString(item.rating)}</span> (${item.rating}점)</div>
-        <div class="record-meta" style="color: #999; font-size:12px;">방문일: ${displayDate}</div>
-        ${item.image ? `<img src="${item.image}" class="list-img" alt="음식 사진">` : ''}
-        ${item.comment ? `<div class="record-comment">${item.comment}</div>` : ''}
+    sorted.forEach((item, index) => {
+      list.innerHTML += `
+        <div class="record-card">
+          <h3>${item.restArea} (${item.highway})</h3>
+          <p>메뉴: ${item.menu} | <span class="rating-star">${'★'.repeat(item.rating)}</span></p>
+          ${item.image ? `<img src="${item.image}" style="width:100%; border-radius:8px;">` : ''}
+          <p style="font-size:12px; color:#666">방문일: ${item.date}</p>
+          <p>${item.comment}</p>
+          <button onclick="editItem(${index})">수정</button>
+          <button onclick="deleteItem(${index})">삭제</button>
+        </div>
       `;
-      listContainer.appendChild(card);
     });
   }
 
-  // 오늘 날짜를 YYYY-MM-DD 형식으로 구해서 기본값으로 넣어주는 함수
-  function setTodayDate() {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    document.getElementById('visitDate').value = `${yyyy}-${mm}-${dd}`;
+  function editItem(index) {
+    const item = records[index];
+    document.getElementById('editIndex').value = index;
+    document.getElementById('restArea').value = item.restArea;
+    document.getElementById('highway').value = item.highway;
+    document.getElementById('visitDate').value = item.date;
+    document.getElementById('menu').value = item.menu;
+    document.getElementById('rating').value = item.rating;
+    document.getElementById('comment').value = item.comment;
+    if(item.image) {
+      document.getElementById('preview').src = item.image;
+      document.getElementById('preview').style.display = 'block';
+      currentImage = item.image;
+    }
   }
 
-  window.onload = function() {
-    setTodayDate();
-    renderList('desc');
-    updateMapMarker();
+  function deleteItem(index) {
+    if(confirm('삭제하시겠습니까?')) {
+      records.splice(index, 1);
+      localStorage.setItem('myHighwayRecords', JSON.stringify(records));
+      renderList();
+    }
+  }
+
+  window.onload = () => {
+    document.getElementById('visitDate').valueAsDate = new Date();
+    renderList();
   };
 </script>
-
 </body>
 </html>
